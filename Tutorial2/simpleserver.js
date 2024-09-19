@@ -7,14 +7,13 @@ async function handler(req) {
     }
 
     // Serve files from the /home/student/public_html directory
-    let pathname = "/Desktop/COMP2406/Tutorial2" + new URL(req.url).pathname;
+    let pathname = "/home/student/public_html" + new URL(req.url).pathname;
 
-    // Serve index.html when a directory is accessed
+    // If the requested path is a directory (ends with "/"), append "index.html"
     if (pathname.endsWith("/")) {
         pathname += "index.html";
     }
 
-    // Handle requests for files like /number5
     const numberPattern = /\/number(\d+)/;
     const match = pathname.match(numberPattern);
 
@@ -25,7 +24,7 @@ async function handler(req) {
         contents = `The number is ${number}!`;
         metadata.contentType = "text/plain";
     } else {
-        // Use the Deno contentType function
+        // Use Deno contentType to determine the correct MIME type
         metadata.contentType = contentType(pathname) || "application/octet-stream";
 
         try {
@@ -34,7 +33,7 @@ async function handler(req) {
             contents = null;
         }
 
-        // Handle 404 errors with a custom HTML page
+        // If file is not found, return 404 error page
         if (!contents) {
             contents = `
                 <html>
