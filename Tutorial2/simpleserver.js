@@ -35,19 +35,15 @@ async function handler(req) {
 
         // If file is not found, return 404 error page
         if (!contents) {
-            contents = `
-                <html>
-                <body>
-                <h1>404 - Page Not Found</h1>
-                <p>The file you requested could not be found.</p>
-                </body>
-                </html>`;
-            metadata.contentType = "text/html";
+            // Serve the 404.html file when a page is not found
+            try {
+                contents = await Deno.readFile("/home/student/public_html/404.html");
+                metadata.contentType = "text/html";
+            } catch (e) {
+                contents = "<html><body><h1>404 - Page Not Found</h1></body></html>";
+            }
             metadata.status = 404;
-
             console.log("error on request for " + pathname);
-        } else {
-            console.log("returning " + pathname + " of type " + metadata.contentType);
         }
     }
 
