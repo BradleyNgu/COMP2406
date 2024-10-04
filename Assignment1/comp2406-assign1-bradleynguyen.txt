@@ -1,0 +1,63 @@
+COMP 2406 2024F Assignment 1
+Name: Bradley Nguyen
+Student ID: 101270011
+
+1. I first began by reviewing the simpleserver2.js file. Here, I was looking for the portion of code responsible for reading and serving files. Next, I located the fileData function which 
+reads the requested file with the line contents = await Deno.readFile("./www" + path_);. Here, I realized that the path is being prefixed with ./wwww which shows that this is the directory 
+being used to serve content. I can verify this by creating a basic index.html file in the designated directory and started the serve. Here by accessing http://localhost:8000, 
+it shows that it correctly served the file from this directory.
+
+2. I first looked at the MIMEtype function, which is responsible for determining the MIME type of the files served by the server. Here, I noticed that the MIME types for common file 
+extensions were listed, but there was no entry for .pdf. To confirm, I placed a .pdf file in the www directory and attempted to access it through the browser.
+By doing this, the server returned the file, but the browser indicated that the MIME type was application/octet-stream, which is a generic MIME type and not specific to PDF files.
+
+
+3. Here, I modified the MIMEtype function to be asynchronous by assigning the async keyword. Next I encountered errors in the fileData function becasue MIMEtype was now returning a 
+Promise instead of a string. The function call needed to be awaited to retrieve the actual value. To fix this, I updated the fileData function by adding await before the MIMEtype call. 
+This ensures that the MIME type was correctly retrieved before being used.
+
+
+4a. First I looked at the handler function where requests are processed. Next, I decided to add a check for the HTTP method at the beginning of the function. 
+If the method was not GET, I would return a 501 not Implemented response. Next, I implement this by adding the following code to the handler function:
+    
+    if (req.method !== "GET") {
+        return new Response("Method not implemented", { status: 501 });
+    }
+
+All in all, I modified the handler function to check the request method and return a 501 Not Implemented response for non-GET requests.
+
+4b. After implementing the check for the GET method, I wanted to be sure that only GET requests were handled. Here, I used curl to send both GET and POST requests to the server. Here I saw 
+that the GET requests were served normally, while the POST requests returned the "Method not implemented" message with the status code 501. Here, no major issues arose.
+
+
+5a. First, I identified that the template_notFound function was handcoded in the source. Next, I created a 404.html file in the www directory and modified the server to read the file during 
+startip. Next I added the following initialization code to load the template at server startup: 
+let notFoundTemplate = "";
+
+async function init() {
+  try {
+    notFoundTemplate = await Deno.readTextFile("./www/404.html");
+  } catch (e) {
+    console.error("Error loading 404 template:", e);
+  }
+}
+
+await init();
+
+All in all, I added code to load the 404.html file during server initialization and replaced the template_notFound function with the loaded content.
+
+5b. I believe my solution is correct because the template is now loaded from a file during server initialization which allows for easy updates to the 404 page without modifying the server code.
+
+5c. The big issue that I kept encountering was the template was loaded asynchronously before the server started processing requests. Here I had to make sure that the init() function was awaited properly.
+
+6a. Here, I realized that the URL object was being used unnecessarily to extract the pathname. Because of this, I decided to use a regular expression to extract the path from the URL string. Here I implemented:
+    
+    var origpath = req.url.match(/^(?:https?:\/\/)?[^\/]+(\/[^?#]*)/)[1];
+
+All in all, I replaced the URL object usage witha  regular expression that directly extracts the path ftom the URL string.
+
+6b. I used MDN Web Docs to understand regular expressions in JavaScript.
+
+6c. I tested the solution by making requests with different URLs containing query strings and fragments. The path was correctly extracted in each case.
+
+6d. Initially, I had trouble handling URLs with query strings and fragments, but I adjusted the regular expression to exclude them from the match.
