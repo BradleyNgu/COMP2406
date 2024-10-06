@@ -3,7 +3,7 @@ Name: Bradley Nguyen
 Student ID:101270011
 
 1. I first began by reviewing the simpleserver2.js file. Here, I was looking for the portion of code responsible for reading and serving files. Next, I located the fileData function which 
-reads the requested file with the line contents = await Deno.readFile("./www" + path_);. Here, I realized that the path is being prefixed with ./wwww which shows that this is the directory 
+reads the requested file with the line contents = await Deno.readFile("./www" + path_);. Here, I realized that the path is being prefixed with ./www which shows that this is the directory 
 being used to serve content. I can verify this by creating a basic index.html file in the designated directory and started the server. Here by accessing http://localhost:8000, 
 it shows that it correctly served the file from this directory.
 
