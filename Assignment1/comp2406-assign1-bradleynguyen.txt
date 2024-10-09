@@ -29,8 +29,8 @@ All in all, I modified the handler function to check the request method and retu
 that the GET requests were served normally, while the POST requests returned the "Method not implemented" message with the status code 501. Here, no major issues arose.
 
 
-5a. First, I identified that the template_notFound function was handcoded in the source. Next, I created a 404.html file in the www directory and modified the server to read the file during 
-startip. Next I added the following initialization code to load the template at server startup: 
+5a. First, I identified that the template_notFound function was hardcoded in the source. Next, I created a 404.html file in the www directory and modified the server to read the file during 
+startup. Next I added the following initialization code to load the template at server startup: 
 let notFoundTemplate = "";
 async function init() {
   try {
