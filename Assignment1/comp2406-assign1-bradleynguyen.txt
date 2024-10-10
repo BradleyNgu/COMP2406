@@ -50,7 +50,7 @@ async function fileData(path) {
 5b. I believe my solution is correct as it follows the requirements of loading the "Page not found" template from an external file rather than hardcoding it. I tested this by accessing non-existent URLs, and 
 the server returned the contents of the 404.html file.
 
-5c. A big issue that I made was forgetting to await the Deno.readFile() call when loading 404.html. Because of this, it retuned a Promise instead of the actual file contents which broke the response.
+5c. A big issue that I made was forgetting to await the Deno.readFile() call when loading 404.html. Because of this, it returned a Promise instead of the actual file contents which broke the response.
 
 6a. First, I noticed that the code was using the URL object to extract the pathname from the URL. Since the question is telling me not to use a URL object, I opted to use regular expressions and Javascript's string manipulation (split in this case) to get the path.
 replace(/^https?:\/\/[^\/]+/, '') is responsible for removing the http:// or https://, the host name, and the port. ^ means the start of the string, https? matches either http or https, 
