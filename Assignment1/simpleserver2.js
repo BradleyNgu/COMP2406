@@ -76,10 +76,10 @@ async function fileData(path) {
 }
 
 async function handler(req) {
+    var origpath = req.url.replace(/^https?:\/\/[^\/]+/, '').split('?')[0].split('#')[0];
+    console.log("Extracted Path:", origpath);  // Log the extracted path
 
-    var origpath = new URL(req.url).pathname;    
     var path = origpath;
-    
     if (path === "/") {
         path = "/index.html";
     }
@@ -88,11 +88,12 @@ async function handler(req) {
 
     console.log(`${r.status} ${req.method} ${r.contentType} ${origpath}`); 
 
-    return new Response(r.contents,
-                        {status: r.status,
-                         headers: {
-                             "content-type": r.contentType,
-                         }});
+    return new Response(r.contents, {
+        status: r.status,
+        headers: {
+            "content-type": r.contentType,
+        }
+    });
 }
 
 Deno.serve(handler);
