@@ -67,6 +67,6 @@ the URL, which starts with #. Like split('?')[0], it splits the string at the # 
 
 6c. I started the simpleserve2 by running deno run --allow-net --allow-read simpleserver2.js. Here I accessed various URLs in the browser and check that the correct file was being served. Next, I used curl to send requests with URLs containing query parameters and fragments to ensure they were being ignored. Here the correct path was extracted as and ignored the query and fragment.
 
-6d. First, I thought I could solely use split to get rid of the fragments and that did work. But when it came to deleting http://localhost:8000, I had trouble grasping how to do such a task. 
+6d. First, I thought I could solely use split to get rid of the query and fragments and that did work. But when it came to deleting http://localhost:8000, I had trouble grasping how to do such a task. 
 Here, I looked on forums on how to solve the problem, and it all pointed to using regular expressions. Here, I used ChatGPT to build my solution as I asked it how to use Regex to delete the 
 http://localhost:8000 since I was often left with http://localhost:8000/index.html when extracting. 
