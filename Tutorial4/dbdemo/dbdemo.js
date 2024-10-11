@@ -36,12 +36,19 @@ function addRecordDB(db, table, r) {
                     [r.name, r.city, r.country, r.birthday, r.email]);
 }
 
-function getAllRecordsDB(db, table) {
+// Modified to support sorting from the database
+function getAllRecordsDB(db, table, sort) {
+    let orderBy = "";
+    if (sort === 'alpha-name') {
+        orderBy = "ORDER BY name ASC";
+    } else if (sort === 'ralpha-name') {
+        orderBy = "ORDER BY name DESC";
+    }
+
     var state = [];
     const query =
           db.prepareQuery(
-              "SELECT id, name, city, country, birthday, email FROM " +
-                  table);
+              `SELECT id, name, city, country, birthday, email FROM ${table} ${orderBy}`);
 
     for (const [id, name, city, country, birthday, email] of query.iter()) {
         state.push({id, name, city, country, birthday, email});
@@ -76,7 +83,6 @@ function MIMEtype(filename) {
 
     return MIME_TYPES[extension] || "application/octet-stream";
 };
-
 
 function template_header(title) {
     return `<!DOCTYPE html>
@@ -114,6 +120,7 @@ function template_addRecord(obj) {
 `
 }
 
+// Modified to handle sorting on the server side
 function template_listRecords(state) {
      const pageTop = `  <body>
     <h1>People Listing</h1>
@@ -158,9 +165,10 @@ function template_listRecords(state) {
         pageTop + row.join("\n") + pageBottom;
 }
 
-
-function listRecords() {
-    var state = getAllRecordsDB(db, table);
+// Modified listRecords to include sorting options
+function listRecords(sort) {
+    var state = getAllRecordsDB(db, table, sort);
+    
     var response = { contentType: "text/html",
                      status: status_OK,
                      contents: template_listRecords(state),
@@ -171,8 +179,11 @@ function listRecords() {
 
 async function routeGet(req) {
     const path = new URL(req.url).pathname;
+    const query = new URL(req.url).searchParams;
+
     if (path === "/list") {
-        return listRecords();
+        const sort = query.get("sort");  // Grab the sort query parameter
+        return listRecords(sort);
     } else {
         return null;
     }
