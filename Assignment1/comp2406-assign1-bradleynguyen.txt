@@ -9,8 +9,8 @@ it shows that it correctly served the file from this directory.
 
 
 2. I first looked at the MIMEtype function, which is responsible for determining the MIME type of the files served by the server. Here, I noticed that the MIME types for common file 
-extensions were listed, but there was no entry for .pdf. To confirm, I placed a .pdf file called sample.pdf in the www directory and attempted to access it through the browser.
-By doing this, the server returned the file, but the browser indicated that the MIME type was 200 GET application/octet-stream/sample.pdf, which is a generic MIME type and not specific to PDF files.
+extensions were listed, but there was no entry for .pdf. To confirm, I placed a .pdf file in the www directory and attempted to access it through the browser.
+By doing this, the server returned the file, but the browser indicated that the MIME type was application/octet-stream, which is a generic MIME type and not specific to PDF files.
 
 
 3. Here, I modified the MIMEtype function to be asynchronous by assigning the async keyword. Next I encountered errors in the fileData function becasue MIMEtype was now returning a 
@@ -29,44 +29,40 @@ All in all, I modified the handler function to check the request method and retu
 that the GET requests were served normally, while the POST requests returned the "Method not implemented" message with the status code 501. Here, no major issues arose.
 
 
-5a. First, I identified that the template_notFound function was hardcoded in the source. Next, I created a 404.html file in the www directory and modified the fileData function so that it loads the 404.html 
-file if the requested file is not found. 
-async function fileData(path) {
-    var contents, status, contentType;
+5a. First, I identified that the template_notFound function was hardcoded in the source. Next, I created a 404.html file in the www directory and modified the server to read the file during 
+startup. Next I added the following initialization code to load the template at server startup: 
+let notFoundTemplate = "";
+async function init() {
+  try {
+    notFoundTemplate = await Deno.readTextFile("./www/404.html");
+  } catch (e) {
+    console.error("Error loading 404 template:", e);
+  }
+}
+await init();
+All in all, I added code to load the 404.html file during server initialization and replaced the template_notFound function with the loaded content.
+
+5b. I believe my solution is correct because the template is now loaded from a file during server initialization which allows for easy updates to the 404 page without modifying the server code.
+
+5c. The big issue that I kept encountering was the template was loaded asynchronously before the server started processing requests. Here I had to make sure that the init() function was awaited properly.
+
+6a. First, I noticed that the code was using the URL object to extract the pathname from the URL. Here, I decided that the best approach was to use the URL object as it was designed for 
+parsing URLs. Next, I updated the URL constructor to include the full request URL by combining req.url with the host header. This would allow me to use the .pathname property, which 
+provides the path part of the URL without needing to manually parse the string or regular expression. I implemented it like this:
     
-    try {
-        contents = await Deno.readFile("./www" + path);  // Tries to read the requested file
-        status = status_OK;
-        contentType = MIMEtype(path);
-    } catch (e) {
-        contents = await Deno.readFile("./www/404.html");  // Loads 404.html if the requested file is not found
-        status = status_NOT_FOUND;
-        contentType = "text/html";
-    }
-    
-    return { contents, status, contentType };
+var origpath = req.url;
+origpath = origpath.split('?')[0];
+origpath = origpath.split('#')[0];
+if (!origpath.startsWith('/')) {
+    origpath = '/' + origpath;
 }
 
-5b. I believe my solution is correct as it follows the requirements of loading the "Page not found" template from an external file rather than hardcoding it. I tested this by accessing non-existent URLs, and 
-the server returned the contents of the 404.html file.
+All in all, I used JavaScript's built-in URL class to extract the path.
 
-5c. A big issue that I made was forgetting to await the Deno.readFile() call when loading 404.html. Because of this, it returned a Promise instead of the actual file contents which broke the response.
-
-6a. First, I noticed that the code was using the URL object to extract the pathname from the URL. Since the question is telling me not to use a URL object, I opted to use regular expressions and Javascript's string manipulation (split in this case) to get the path.
-replace(/^https?:\/\/[^\/]+/, '') is responsible for removing the http:// or https://, the host name, and the port. ^ means the start of the string, https? matches either http or https, 
-and :// matches the literal :// that follows http or https. [^\/]+ is a character class that means "any character that is not a // + means "one or more occurences. Here, this part 
-matches the domain name (in our case localhost), up to the first / after the domain name. The replace() replaces the matched portion with an empty string. Split('?') splits the string at 
-the ? character into an array. Here the first element will be the part before the ? and the second element will be the query string. split('#')[0] removes any fragment identifier from 
-the URL, which starts with #. Like split('?')[0], it splits the string at the # into an array and the first element [0] will be the part before the # and the second element will be the fragment. 
-    
-    var origpath = req.url.replace(/^https?:\/\/[^\/]+/, '').split('?')[0].split('#')[0];
-    console.log("Extracted Path:", origpath);  // Log the extracted path to check
-
-
-6b. I used ChatGPT model 4o to familarize myself with regular expressions and what it does (especially since I was having trouble removing the http://localhost:8000), then used W3schools to understand how to use split and replace.
+6b. I used MDN Web documentation on understanding how to use URL object. The pathname property section of the MDN Web Docs provided information on how to extract the path part of a URL.
 
 6c. I started the simpleserve2 by running deno run --allow-net --allow-read simpleserver2.js. Here I accessed various URLs in the browser and check that the correct file was being served. Next, I used curl to send requests with URLs containing query parameters and fragments to ensure they were being ignored. Here the correct path was extracted as and ignored the query and fragment.
 
-6d. First, I thought I could solely use split to get rid of the query and fragments and that did work. But when it came to deleting http://localhost:8000, I had trouble grasping how to do such a task. 
-Here, I looked on forums on how to solve the problem, and it all pointed to using regular expressions. Here, I used ChatGPT to build my solution as I asked it how to use Regex to delete the 
-http://localhost:8000 since I was often left with http://localhost:8000/index.html when extracting. 
+6d. First, I thought about using a regular expression, but in this case it would be unnecessary and too complex. Another problem was handling host information. Here, I ran into a minor issue 
+when using the URL object because it expects a full qualified URL. To fix this, I first had to retrieve the host information using req.headers.get("host") and pass it as the second argument 
+to the URL constructor.
