@@ -15,7 +15,7 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 const status_NOT_FOUND = 404;
 const status_OK = 200;
 const status_NOT_IMPLEMENTED = 501;
-const appTitle = "COMP 2406 DB Demo 2";
+const appTitle = "People Records Application";
 const dbFile = "people.db";
 const table = "people";
 
