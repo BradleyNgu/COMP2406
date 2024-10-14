@@ -1,0 +1,49 @@
+COMP 2406 2024F Assignment 2
+Name: Bradley Nguyen
+Student ID: 101270011
+
+1. If I removed line 24-33, I get a Sqlite Error. Since db.execute() creates a the people table, by removing it, 
+the application cannot insert data into it leading to an error. I tested it by running 
+deno run --allow-net --allow-read --allow-write dbdemo2.js then running a curl command to add to the database. 
+After that I run into the error below:
+SqliteError: no such table: people
+    at DB.prepareQuery (https://deno.land/x/sqlite@v3.9.1/src/db.ts:366:13)
+    at DB.query (https://deno.land/x/sqlite@v3.9.1/src/db.ts:258:24)
+    at addRecordDB (file:///Users/bradleynguyen/Desktop/School/COMP2406/Assignment2/dbdemo2/dbdemo2.js:26:15)
+    at addRecord (file:///Users/bradleynguyen/Desktop/School/COMP2406/Assignment2/dbdemo2/dbdemo2.js:206:5)
+    at eventLoopTick (ext:core/01_core.js:175:7)
+    at async routePost (file:///Users/bradleynguyen/Desktop/School/COMP2406/Assignment2/dbdemo2/dbdemo2.js:252:16)
+    at async route (file:///Users/bradleynguyen/Desktop/School/COMP2406/Assignment2/dbdemo2/dbdemo2.js:264:16)
+    at async handler (file:///Users/bradleynguyen/Desktop/School/COMP2406/Assignment2/dbdemo2/dbdemo2.js:296:14)
+    at async ext:deno_http/00_serve.ts:369:18 {
+  code: 1,
+  name: "SqliteError"
+
+
+}
+
+
+
+2. 
+
+
+3. 
+
+
+4. 
+
+
+5. 
+
+
+6a. 
+
+6b. 
+
+
+7a.
+
+7b.
+
+
+8. 
