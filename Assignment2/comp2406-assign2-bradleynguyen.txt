@@ -22,12 +22,19 @@ SqliteError: no such table: people
 
 }
 
+2. Yes there is a pattern. The pattern is that all page title are 
+prefixed with the value of appTitle, which is "COMP 2406 DB Demo 2." 
+The pattern is centrally determined by the template_header function, 
+which appends the specific page title to appTitle. In this case I changed 
+const appTitle = "Bruh"; and observed that the Browser tab now says bruh when 
+/list or /analyze is typed at the end or the local host url.
 
 
-2. 
-
-
-3. 
+3. /add is treated as a form submission endpoint via POST (handled in the 
+routePost function), while /add.html would be treated as a static HTML 
+file. The /add route triggers the addRecord function, which adds a new 
+record to the database and returns a confirmation page, while /add.html 
+is likely a form page served statically.
 
 
 4. 
