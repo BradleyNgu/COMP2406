@@ -30,25 +30,122 @@ const appTitle = "Bruh"; and observed that the Browser tab now says bruh when
 /list or /analyze is typed at the end or the local host url.
 
 
-3. /add is treated as a form submission endpoint via POST (handled in the 
-routePost function), while /add.html would be treated as a static HTML 
-file. The /add route triggers the addRecord function, which adds a new 
-record to the database and returns a confirmation page, while /add.html 
-is likely a form page served statically.
+3. When I run the code, /add.html sends me to a form submission page where I can submit information. After pressing the submit button it sends data to the /add route and the new record is added to the database. After this I checked /list and saw that my submission was saved to the database.
 
+4. If I run dbdemo2 with line 338 I am able to properly close the database and close the program when I input ctrl + c in terminal.
+200 GET text/html /list
+200 GET text/css /style.css
+SIGINT received, terminating...
+Server terminating, closing database.
 
-4. 
+If I run dbdemo2 without line 338, the database never closes and ctrl + c does not work, thus I have to forcefully terminate the program.
+200 GET text/html /list
+200 GET text/css /style.css
+SIGINT received, terminating...
+I have to kill it here in order to end
 
+For both of these scenarios, I tested http://localhost:8000/list and pressed ctrl + c to see what happens.
 
-5. 
+5. There is a maximum number of records that will be shown by /list. In the getAllRecordsDB function where it says the limit is 50. To test this, I wrote this function:
+function addSampleRecords(db, table) {
+    for (let i = 1; i <= 50; i++) {
+        addRecordDB(db, table, {
+            name: `Person${i}`,
+            city: `City${i}`,
+            country: `Country${i}`,
+            birthday: `1990-01-${String(i).padStart(2, '0')}`,
+            email: `person${i}@example.com`
+        });
+    }
+    console.log("50 records added to the database.");
+}
+addSampleRecords(db, table);
 
+This function adds 50 records into the database. In this case since there are already 2 records in the database, I added another 50 and it proves that the max is 50 when listed as in /list, I counted 50 records.
 
-6a. 
+6a. I can modify the client-side code to sort the city list using sort() on the array of cities by adding this:
+var cityListArray = analysis.cityList.map(row => row[0]); <- this line extract the first element from each row of the analysis.cityList array which creates a bew array that contains only city names
+cityListArray.sort(); <- This sorts the array
+var cityList = '<li>' + cityListArray.join('</li> <li>') + '</li>';
 
-6b. 
+When first approaching this problem, I thought I could just use .sort() and be done but I realized its more much efficient if I extracted and mapped the city names then use sort.
 
+6b. function analyzeRecordsDB(db, table) {
+      var analysis = {};
 
-7a.
+      // Get the count of all records in the table
+      const countQuery = db.query("SELECT COUNT(*) FROM " + table);
+      analysis.count = countQuery[0][0];  // Extract the count from the query result
+
+      // Fetch distinct cities sorted alphabetically
+      const cityQuery = db.query("SELECT DISTINCT city FROM " + table + " ORDER BY city ASC");
+      analysis.cityList = cityQuery.map(row => row[0]);  // Extract just the city names
+
+    return analysis;
+  }
+SELECT COUNT(*) query returns the total number of records in the table in which its stored in analysis.count
+SELECT DISTINCT city FROM table ORDER BY city ASC fetches the unique city names and sorts them in ascending aplabetical order.
+cityQuery.map(row => row[0]) extracts the city name from easch row and returns an array of arrays.
+
+This is the same thinking as 6a but using SQL commands.
+
+7a. async function analyzeRecordsDB(db, table) {
+      var analysis = {};
+      analysis.count = db.query("SELECT COUNT(*) FROM " + table)[0][0];
+      analysis.cityList = db.query("SELECT DISTINCT city FROM " + table + " ORDER BY city ASC").map(row => row[0]);
+      analysis.countryList = db.query("SELECT DISTINCT country FROM " + table + " ORDER BY country ASC").map(row => row[0]);
+
+    
+      analysis.uniqueCityCount = db.query("SELECT COUNT(DISTINCT city) FROM " + table)[0][0];
+      analysis.uniqueCountryCount = db.query("SELECT COUNT(DISTINCT country) FROM " + table)[0][0];
+
+      return analysis;
+  }
+
+  Here, analysis.cityList: Fetches and sorts the unique cities alphabetically, analysis.countryList: Fetches and sorts the unique countries alphabetically, analysis.uniqueCityCount: Retrieves the number of unique cities, and analysis.uniqueCountryCount: Retrieves the number of unique countries.
+
+  async function showAnalysis() {
+    var analysis = analyzeRecordsDB(db, table);
+
+    // Convert city and country lists to HTML <li> format
+    var cityList = '<li>' + analysis.cityList.join('</li><li>') + '</li>';
+    var countryList = '<li>' + analysis.countryList.join('</li><li>') + '</li>';
+
+    var analysisBody = `
+    <body>
+      <h1>Database analysis</h1>
+      <p># Records: ${analysis.count}</p>
+      <p># Unique Cities: ${analysis.uniqueCityCount}</p>
+      <p># Unique Countries: ${analysis.uniqueCountryCount}</p>
+      <p>Cities:
+        <ol>
+          ${cityList}
+        </ol>
+      </p>
+      <p>Countries:
+        <ol>
+          ${countryList}
+        </ol>
+      </p>
+      <form method="get" action="/">
+        <button type="submit">Home</button>
+      </form>
+    </body>
+    </html>`;
+
+    var contents = template_header("Analysis") + analysisBody;
+
+    var response = { 
+        contentType: "text/html",
+        status: status_OK,
+        contents: contents,
+    };
+    
+    return response;
+}
+
+Unique Counts: Display the number of unique cities and countries using analysis.uniqueCityCount and analysis.uniqueCountryCount.
+Country List: Render the unique list of countries in an ordered list (<ol>) by converting the countryList array into a list of <li> elements, similar to how the city list is handled.
 
 7b.
 

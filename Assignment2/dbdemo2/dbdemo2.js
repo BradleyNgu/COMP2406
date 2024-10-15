@@ -61,11 +61,20 @@ function getAllRecordsDB(db, table) {
 function analyzeRecordsDB(db, table) {
     var analysis = {};
 
-    analysis.count = db.query("SELECT COUNT(*) FROM " + table);
-    analysis.cityList = db.query("SELECT DISTINCT CITY FROM " + table);
-    
+    // Count the total number of records
+    analysis.count = db.query("SELECT COUNT(*) FROM " + table)[0][0];
+
+    // Fetch distinct cities and countries
+    analysis.cityList = db.query("SELECT DISTINCT city FROM " + table + " ORDER BY city ASC").map(row => row[0]);
+    analysis.countryList = db.query("SELECT DISTINCT country FROM " + table + " ORDER BY country ASC").map(row => row[0]);
+
+    // Count distinct cities and countries
+    analysis.uniqueCityCount = db.query("SELECT COUNT(DISTINCT city) FROM " + table)[0][0];
+    analysis.uniqueCountryCount = db.query("SELECT COUNT(DISTINCT country) FROM " + table)[0][0];
+
     return analysis;
 }
+
 
 
 function MIMEtype(filename) {
@@ -227,33 +236,44 @@ async function addRecord(req) {
 
 async function showAnalysis() {
     var analysis = analyzeRecordsDB(db, table);
-    var cityList = '<li>' + analysis.cityList.join('</li> <li>') + '</li>';
-    
-    var analysisBody = `  <body>
-  <body>
-    <h1>Database analysis</h1>
-    <p># Records: ${analysis.count}</p>
-    <p>Cities:
-      <ol>
-       ${cityList}
-      </ol>
-    </p>
 
-    <form method="get" action="/">
-      <button type="submit">Home</button>
-    </form>
-  </body>
-</html>`
+    // Convert city and country lists to HTML <li> format
+    var cityList = '<li>' + analysis.cityList.join('</li><li>') + '</li>';
+    var countryList = '<li>' + analysis.countryList.join('</li><li>') + '</li>';
+
+    var analysisBody = `
+    <body>
+      <h1>Database analysis</h1>
+      <p># Records: ${analysis.count}</p>
+      <p># Unique Cities: ${analysis.uniqueCityCount}</p>
+      <p># Unique Countries: ${analysis.uniqueCountryCount}</p>
+      <p>Cities:
+        <ol>
+          ${cityList}
+        </ol>
+      </p>
+      <p>Countries:
+        <ol>
+          ${countryList}
+        </ol>
+      </p>
+      <form method="get" action="/">
+        <button type="submit">Home</button>
+      </form>
+    </body>
+    </html>`;
 
     var contents = template_header("Analysis") + analysisBody;
 
-    var response = { contentType: "text/html",
-                     status: status_OK,
-                     contents: contents,
-                   };
+    var response = { 
+        contentType: "text/html",
+        status: status_OK,
+        contents: contents,
+    };
     
     return response;
 }
+
 
 
 async function routePost(req) {
