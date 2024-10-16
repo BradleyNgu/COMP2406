@@ -115,6 +115,8 @@ To then display these counts, I included them in the HTML body like this:
 <p># Unique Cities: ${analysis.uniqueCityCount}</p>
 <p># Unique Countries: ${analysis.uniqueCountryCount}</p>
 
+For both 7a and 7b, I just used the SQL query to retrieve information, then displayed it within the HTML body.
+
 8. In the add.html I wrote <input id="birthday" type="date" name="birthday" required>. on line 25. 
 In this case, I didn't need to modify the dbdemo2.js code as there is a date selection that 
 is strict so you wont get a month 13 or day 32. It will always make the format YYYY-MM-DD. 
