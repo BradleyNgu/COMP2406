@@ -19,7 +19,6 @@ SqliteError: no such table: people
   code: 1,
   name: "SqliteError"
 
-
 }
 
 2. Yes there is a pattern. The pattern is that all page title are 
@@ -89,65 +88,35 @@ cityQuery.map(row => row[0]) extracts the city name from easch row and returns a
 
 This is the same thinking as 6a but using SQL commands.
 
-7a. async function analyzeRecordsDB(db, table) {
-      var analysis = {};
-      analysis.count = db.query("SELECT COUNT(*) FROM " + table)[0][0];
-      analysis.cityList = db.query("SELECT DISTINCT city FROM " + table + " ORDER BY city ASC").map(row => row[0]);
-      analysis.countryList = db.query("SELECT DISTINCT country FROM " + table + " ORDER BY country ASC").map(row => row[0]);
+7a. To add a list of unique conuntries to the page, we can do
+analysis.countryList = db.query("SELECT DISTINCT country FROM " + table + " ORDER BY country ASC").map(row => row[0]);
 
-    
-      analysis.uniqueCityCount = db.query("SELECT COUNT(DISTINCT city) FROM " + table)[0][0];
-      analysis.uniqueCountryCount = db.query("SELECT COUNT(DISTINCT country) FROM " + table)[0][0];
+In the showAnalysis function I then need to render the list by converting the countryList array into an HYML ordered list with <li? elements
 
-      return analysis;
-  }
+var countryList = '<li>' + analysis.countryList.join('</li><li>') + '</li>';
 
-  Here, analysis.cityList: Fetches and sorts the unique cities alphabetically, analysis.countryList: Fetches and sorts the unique countries alphabetically, analysis.uniqueCityCount: Retrieves the number of unique cities, and analysis.uniqueCountryCount: Retrieves the number of unique countries.
+This takes the sorted list of countries and turns it into an order HTML list:
 
-  async function showAnalysis() {
-    var analysis = analyzeRecordsDB(db, table);
-
-    // Convert city and country lists to HTML <li> format
-    var cityList = '<li>' + analysis.cityList.join('</li><li>') + '</li>';
-    var countryList = '<li>' + analysis.countryList.join('</li><li>') + '</li>';
-
-    var analysisBody = `
-    <body>
-      <h1>Database analysis</h1>
-      <p># Records: ${analysis.count}</p>
-      <p># Unique Cities: ${analysis.uniqueCityCount}</p>
-      <p># Unique Countries: ${analysis.uniqueCountryCount}</p>
-      <p>Cities:
-        <ol>
-          ${cityList}
-        </ol>
-      </p>
-      <p>Countries:
-        <ol>
-          ${countryList}
-        </ol>
-      </p>
-      <form method="get" action="/">
-        <button type="submit">Home</button>
-      </form>
-    </body>
-    </html>`;
-
-    var contents = template_header("Analysis") + analysisBody;
-
-    var response = { 
-        contentType: "text/html",
-        status: status_OK,
-        contents: contents,
-    };
-    
-    return response;
-}
-
-Unique Counts: Display the number of unique cities and countries using analysis.uniqueCityCount and analysis.uniqueCountryCount.
-Country List: Render the unique list of countries in an ordered list (<ol>) by converting the countryList array into a list of <li> elements, similar to how the city list is handled.
+<p>Countries:
+  <ol>
+    ${countryList}
+  </ol>
+</p>
 
 7b.
 
+To get the count I need to retrieve the counts for both unique cities and unique countries.
 
-8. 
+analysis.uniqueCityCount = db.query("SELECT COUNT(DISTINCT city) FROM " + table)[0][0];
+analysis.uniqueCountryCount = db.query("SELECT COUNT(DISTINCT country) FROM " + table)[0][0];
+
+To then display these counts, I included them in the HTML body like this:
+
+<p># Unique Cities: ${analysis.uniqueCityCount}</p>
+<p># Unique Countries: ${analysis.uniqueCountryCount}</p>
+
+8. In the add.html I wrote <input id="birthday" type="date" name="birthday" required>. on line 25. 
+In this case, I didn't need to modify the dbdemo2.js code as there is a date selection that 
+is strict so you wont get a month 13 or day 32. It will always make the format YYYY-MM-DD. 
+To get to this, I searched on YouTube how to work with dates in html and got the video https://www.youtube.com/watch?v=VCklKwo2TmQ&ab_channel=CWM-CodingWithMike. 
+From here it was very straight forward to implement. 
