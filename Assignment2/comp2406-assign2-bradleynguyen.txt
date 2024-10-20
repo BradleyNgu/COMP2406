@@ -29,7 +29,9 @@ const appTitle = "Bruh"; and observed that the Browser tab now says bruh when
 /list or /analyze is typed at the end or the local host url.
 
 
-3. When I run the code, /add.html sends me to a form submission page where I can submit information. After pressing the submit button it sends data to the /add route and the new record is added to the database. After this I checked /list and saw that my submission was saved to the database.
+3. When I run the code, /add.html sends me to a form submission page where I can submit information. 
+After pressing the submit button it sends data to the /add route and the new record is added to the database. 
+After this I checked /list and saw that my submission was saved to the database.
 
 4. If I run dbdemo2 with line 338 I am able to properly close the database and close the program when I input ctrl + c in terminal.
 200 GET text/html /list
