@@ -1,32 +1,182 @@
-COMP 2406 2024F Midterm
+COMP 2406 2024F Midterm Exam
 Name: Bradley Nguyen
 Student ID: 101270011
 
-1. 
+1. In this part, we can locate the code where it handles the server. In this case it is:
+const server = Deno.serve(
+    {
+        signal: ac.signal,
+        port: 8000,
+        hostname: "0.0.0.0"
+    },
+    handler);
+
+    Here we will change the 8000 to 7000.
+    To test this, when I run deno run --allow-net --allow-read --allow-write dbdemo2.js it will properly load when I type http://localhost:7000 into chrome but won't if I type http://localhost:8000 (chich is the default)
 
 
-2. 
+
+2a. the object req contains the info about the HTTPS request such as the request method, URL of the request, headers, and a body.
+
+2b. async function handler(req) {
+
+    var origpath = new URL(req.url).pathname;
+    var path = origpath;
+    var r =  await route(req);
+    
+    if (!r) {
+        if (path === "/") {
+            path = "/index.html";
+        }
+        r = await fileData(path);
+    }
+
+    console.log(`${r.status} ${req.method} ${r.contentType} ${origpath}`); 
+
+    return new Response(r.contents,
+                        {status: r.status,
+                         headers: {
+                             "content-type": r.contentType,
+                         }});
+}
+
+req is used in the handler() function. Here there are two example if req which are req.url and req.method. With req.url it determines the path and route of the request. Here it contains the full URL string of the request. In this case if the user visits http://localhost:7000/list, req.url would contain "/list".
+req.method is used to determine whether the request is a GET or POST and to route it to the proper handler. Here, it contains the HTTP method of the request such as GET or POST.
 
 
-3. 
+2c. Yes, the handler() does need to be asynchronous. This is because it needs to handle asynchronous operations. In this case the handler function is responsible for handling HTTP requests which deals with reading files from the system and handling network requests. Because of this, async is needed as reading from the disk which not only takes time but can also cause the server to be blocked while waiting for the file to be read. By using async, it allows for the server to handle multiple requests without blocking other operations. 
 
 
-4a. 
-
-4b. 
-
-
-5a. 
-
-5b. 
-
-5c. 
+3. The two methods of the Deno object that we used in class are Deno.readFile() and Deno.Serve(). readFIle() reads the content of a file asynchronously from the file systems then returns a promise which resolves with the contents of the file.
+Serve() creates an HTTP server that listens for incoming HTTP requests and allows you to start the HTTP server basically allowing you to run a web server in Deno.
 
 
-6a. 
+4a. The Deno permissions needed to run are --allow-read which wo;; read the test.db file and --allow-write which creates or changes the test.db file.
 
-6b. 
+4b. This code will not cause Deno to access the network. This is because it imports a module from the URL https://deno.land/x/sqlite/mod.ts, in which case the file operation of reading/writing to test.db is done locally. 
 
-6c. 
+4c. If test.db doesn't already exist, the code will create a new SQLite database file with the name test.db.
 
-6d. 
+4d. We can be certain that db is ready for queries as when the line new DB("test.db) executes, the SQLite database is created or opened.
+
+
+5. The push() method is used to add element to the end of an array. The collection of objects will be ordered in this case as arrays in JS maintain the order in which elements are inserted. Here we can show this by this code snippet:
+let collection = [];
+collection.push({name: "Bruh", age: 25});
+collection.push({name: "Nugget", age: 30});
+collection.push({name: "Abigail", age: 30});
+console.log(collection);
+
+Here the output will be [ { name: 'Bruh', age: 25 }, { name: 'Nugget', age: 30 } ]
+
+It will not order by alphabet but it will be order in the sense that everytime you push onto the array it will add to the end. Just to clarify since the wording of this question is kinda weird.
+
+
+6. INSERT can be used to store individual objects into a table. Here Each object corresponds to a row in the table where the properties of the object map to columns in the table. Here is a code snippet:
+function addRecordDB(db, table, r) {
+    return db.query(`INSERT INTO ${table} ` +
+                    "(name, city, country, birthday, email) " +
+                    "VALUES (?, ?, ?, ?, ?)",
+                    [r.name, r.city, r.country, r.birthday, r.email]);
+}
+
+In this case it will be unordered unless ORDER BY is used when fetching data. 
+
+7. Slice() is a method used to extract the file extension froma file name. In the MIMEtype function, it slices the string from the last occurence of the "." to get the file extension. So for example:
+
+extension = filename.slice(filename.lastIndexOf('.')+1).toLowerCase()
+
+example.txt will return example
+
+toLowerCase makes sure that the extracted file extenstion is in all lowercase. 
+
+8. No, the browser will not always follow the MIME type specified. It may be overridden based on factors like the files' content of security considerations in which it may refuse to execute. I can test this out by setting up a simple server to serve files with wrong MIME types and observing how the browser handles them.
+
+9. ${} is used in template literals to embed expressions within the string. In class it is used to dynamically insert values into strings/variable. For example: 
+
+let expression = "where my hug at?";
+console.log(`Yo shorty, ${expression}!?`);
+
+
+10. To add a static HTML doc to dbdemo2 we place a new HTML document into the /static dir, then we must check that fileDate() is correctly referencing the new document when serving static files, then update the HTML or JavaScript file to link the new static page if absolutely necessary. 
+
+
+11. To add the X-email header to the response of the POST /add request we first need to make sure that the we pass the email response which is handled in the addRecord function into the response. Next we need to add a custom header X-Email which would contain the email that was submitted by modifying the HTTP response headers. Next we need to ensure it's only for POST /add. In this case we only want the header to be included for the POST /add so the code needs to ensure that the logic only runs when handling that specific route. 
+ 
+async function addRecord(req) {
+    var body = await req.formData();
+    var obj = { 
+        name: body.get("name"),
+        city: body.get("city"),
+        country: body.get("country"),
+        birthday: body.get("birthday"),
+        email: body.get("email") 
+    };
+
+    addRecordDB(db, table, obj);
+
+    var response = { 
+        contentType: "text/html",
+        status: status_OK,
+        contents: template_addRecord(obj),
+    };
+
+    //Add the X-Email header to the response
+    return new Response(response.contents, {
+        status: response.status,
+        headers: {
+            "content-type": response.contentType,
+            "X-Email": obj.email // Add the custom X-Email header
+        }
+    });
+}
+
+12. To change GET /list to include the ID of each record I need to update the SQL query in getAllRecordsDB(). Here I need to make sure the SQL query fetches the id field in addition to the other fields. This will give access to the id of each record from the database. Next, I need to modify the HTML table to include an additional <th> in template_listRecords() for the ID field, then I need to ensure that the id of each record is displayed in the table rows.
+
+function template_listRecords(state) {
+    const pageTop = `  <body>
+    <h1>People Listing</h1>
+    <div>
+      <div></div>
+      <table>
+        <thead>
+          <th>ID</th>   <- Added an ID column here
+          <th>Name</th>
+          <th>City</th>
+          <th>Country</th>
+          <th>Birthday</th>
+          <th>Email</th>
+        </thead>
+        <tbody>`;
+
+    const pageBottom = `        </tbody>
+      </table>
+    </div>
+    <form method="get" action="/">
+      <button type="submit">Home</button>
+    </form>
+  </body>
+</html>`;
+
+    var row = [];
+
+    function rowMarkup(s) {
+        return "<td>" + s + "</td>";
+    }
+
+    for (let r of state) {
+        row.push("<tr>")
+        row.push(rowMarkup(r.id));  <- Adding the ID here
+        row.push(rowMarkup(r.name));
+        row.push(rowMarkup(r.city));
+        row.push(rowMarkup(r.country));
+        row.push(rowMarkup(r.birthday));
+        row.push(rowMarkup(r.email));
+        row.push("</tr>")
+    }
+
+    return template_header("List of Records") +
+        pageTop + row.join("\n") + pageBottom;
+}
+
+In this case we don't actually have to change anything for getAllRecordsDB() since id is in the query but if it didn't we would have to add it.
