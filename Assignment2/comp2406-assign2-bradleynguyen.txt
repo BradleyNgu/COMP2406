@@ -65,7 +65,7 @@ addSampleRecords(db, table);
 This function adds 50 records into the database. In this case since there are already 2 records in the database, I added another 50 and it proves that the max is 50 when listed as in /list, I counted 50 records.
 
 6a. I can modify the client-side code to sort the city list using sort() on the array of cities by adding this:
-var cityListArray = analysis.cityList.map(row => row[0]); <- this line extract the first element from each row of the analysis.cityList array which creates a bew array that contains only city names
+var cityListArray = analysis.cityList.map(row => row[0]); <- this line extract the first element from each row of the analysis.cityList array which creates a new array that contains only city names
 cityListArray.sort(); <- This sorts the array
 var cityList = '<li>' + cityListArray.join('</li> <li>') + '</li>';
 

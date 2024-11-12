@@ -1,36 +1,33 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>COMP 2406 DOM Demo: Add Record</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Record</title>
     <link rel="stylesheet" href="/style.css">
-  </head>
-  <body>
-    <h1>Add Record</h1>
-    <div>
-      <p>Fill out the info for the person to be added:</p>
-      <form method="post" action="/add">
-        <div>
-          <input id="name" type="text" name="name">
-          <label>Name</label>
-        </div>
-        <div>
-          <input id="country" type="text" name="city">
-          <label>City</label>
-        </div>
-        <div>
-          <input id="country" type="text" name="country">
-          <label>Country</label>
-        </div>
-        <div>
-          <input id="birthday" type="text" name="birthday">
-          <label>Birthday</label>
-        </div>
-        <div>
-          <input id="email" type="text" name="email">
-          <label>Email</label>
-        </div>
-        <button type="submit">Submit</button>
-      </form>
+</head>
+<body>
+    <h1>Add a New Person</h1>
+    <div id="form-container">
+        <form id="add-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br>
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required><br>
+            <label for="country">Country:</label>
+            <input type="text" id="country" name="country" required><br>
+            <label for="birthday">Birthday:</label>
+            <input type="date" id="birthday" name="birthday" required><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+            <button type="submit">Add Person</button>
+        </form>
     </div>
-  </body>
+
+    <div id="response-container" style="display:none;">
+        <h2>Person Added</h2>
+        <p id="response-message"></p>
+    </div>
+
+    <script src="/add.js"></script> <!-- Minimal change to include JS file -->
+</body>
 </html>
