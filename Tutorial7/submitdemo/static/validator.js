@@ -98,6 +98,7 @@ function checkSubmission(fn, f) {
     try {
         q.name = lines[1].match(/^Name:(.+)/m)[1].trim();
         q.studentID = lines[2].match(/^Student ID:(.+)/m)[1].trim();
+        q.section = lines[3].match(/^Section:(.+)/m)[1].trim(); //trim the section
     } catch (error) {
         updateTag("status", "ERROR " + fn +
                   " has bad Name or Student ID field");
@@ -106,6 +107,7 @@ function checkSubmission(fn, f) {
 
     updateTag("name", q.name);
     updateTag("studentID", q.studentID);
+    updateTag("section", q.section); //added section here
     
     var questionRE = /^([0-9a-g]+)\.(.*)/;
     

@@ -27,6 +27,7 @@ db.execute(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     studentID INTEGER,
     name TEXT,
+    section TEXT, 
     q1 TEXT,
     q2 TEXT,
     q3 TEXT,
@@ -35,11 +36,13 @@ db.execute(`
   )
 `);
 
+//added section TEXT
+
 
 function addSubmissionDB(db, table, r) {
     return db.query(`INSERT INTO ${table} ` +
-                    "(studentID, name, q1, q2, q3, q4, q5) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "(studentID, name, section, q1, q2, q3, q4, q5) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     [r.studentID, r.name,
                      r["1"], r["2"], r["3"], r["4"], r["5"]]);
 }
@@ -48,13 +51,15 @@ function getAllSubmissionsDB(db, table) {
     var state = [];
     const query =
           db.prepareQuery(
-              "SELECT id, studentID, name, q1, q2, q3, q4, q5 FROM " +
+              "SELECT id, studentID, section, name, q1, q2, q3, q4, q5 FROM " +
                   table + " ORDER BY name ASC LIMIT 50");
 
-    for (const [id, studentID, name, q1, q2, q3, q4, q5]
+    for (const [id, studentID, name, section, q1, q2, q3, q4, q5]
          of query.iter()) {
-        state.push({id, studentID, name, q1, q2, q3, q4, q5});
+        state.push({id, studentID, name, section, q1, q2, q3, q4, q5});
     }
+
+    //added
 
     query.finalize();
     
@@ -130,6 +135,7 @@ function template_addRecord(obj) {
     <h1>Submission just added</h1>
     <p>Student ID: ${obj.studentID}</p>
     <p>Name: ${obj.name}</p>
+    <p>Section: ${obj.section}</p>
     <p>Q1: ${obj.q1}</p>
     <p>Q2: ${obj.q2}</p>
     <p>Q3: ${obj.q3}</p>
@@ -142,6 +148,8 @@ function template_addRecord(obj) {
 </html>
 `
 }
+
+//added sction in the template header
 
 
 function listSubmissions() {

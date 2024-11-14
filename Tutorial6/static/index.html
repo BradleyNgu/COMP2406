@@ -18,7 +18,7 @@
 
     //changed to times new roman and padding used to be 50, now is 25    
       
-      const filePrefix = "comp2406-assignment3";
+      const filePrefix = "comp2406-assignment3"; //changed to 
       const submissionName = "COMP 2406 2024F Assignment 3" //changed to assignment 3
       const expectedQuestionList = "1,2,3,4,5,6,7,8,9,10"; //1-10
       var analysisSection;
@@ -152,7 +152,7 @@
           for (let qName of questionList) {
               let qText = q[qName];
               newP = document.createElement("p");
-              newText = document.createTextNode("Q" + qName + ":"); // Prefix "Q" to question number);
+              newText = document.createTextNode("Q" + qName + ":"); // Prefix "Q" to question number); Had to chatGPT this part because I couldn't find it
               newP.appendChild(newText);
               questionDiv.appendChild(newP);
               newPre = document.createElement("pre");
@@ -181,7 +181,7 @@
       <p>Filename: <span id="filename"></span></p>
       <p>Name: <span id="name"></span><br>
         Student ID: <span id="studentID"></span><br>
-        Section: <span id="section"></span> <i>(Please check that your section is correct!)</i></p>
+        Section: <span id="section"></span> <i>(Please check that your section is correct!)</i></p> 
       <hr>
       <div id="questions"><p><b>Questions:</b> <i>(Please check that your answers are numbered correctly!)</i></p></div>
     </div>
