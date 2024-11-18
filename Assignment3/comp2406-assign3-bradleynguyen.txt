@@ -1,0 +1,145 @@
+COMP 2406 2024F Assignment 3
+Name: Bradley Nguyen
+Student ID: 101270011
+
+1. In submit demo there is this line:
+
+const filePrefix = "comp2406-tutorial7";
+
+Here instead of comp2406-tutorial7, we can name it comp2406-assign3-(this can be anything).text
+
+2. No, it will not upload. For this, I added a 6th question in which I get this error:
+
+ERROR expected questions 1,2,3,4,5 but got questions 1,2,3,4,5,6
+
+When I press the upload button, I get the error:
+
+UPLOAD ERROR of comp2406-tutorial7-bradleynguyen.txt, failed with status 500
+
+The reason this happens is because validator.js first makes sure all fields are valid then the server will receive the upload request, and will appear in the database. If one condition isn't fulfilled, it will the server will not receive the upload request, and nothing will appear in the database.
+
+3. To change the number of questions to 6 questions, I'll change this line of code:
+
+const expectedQuestionList = "1,2,3,4,5";
+
+Here all I will do is add 6 to the string.
+
+This works as this line:
+
+var numQuestions = expectedQuestionList.split(",").length;
+
+splits the string then it compares the the amount of questions in the file "number." to the numbers inside the the const.
+
+Then in submitdemo.js you need to change:
+
+function addSubmissionDB(db, table, r) {
+    return db.query(`INSERT INTO ${table} ` +
+                    "(studentID, name, section, q1, q2, q3, q4, q5) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    [r.studentID, r.name,
+                     r["1"], r["2"], r["3"], r["4"], r["5"]]);
+}
+
+function getAllSubmissionsDB(db, table) {
+    var state = [];
+    const query =
+          db.prepareQuery(
+              "SELECT id, studentID, section, name, q1, q2, q3, q4, q5 FROM " +
+                  table + " ORDER BY name ASC LIMIT 50");
+
+    for (const [id, studentID, name, section, q1, q2, q3, q4, q5]
+         of query.iter()) {
+        state.push({id, studentID, name, section, q1, q2, q3, q4, q5});
+    }
+}
+
+To...
+
+function getAllSubmissionsDB(db, table) {
+    var state = [];
+    const query =
+          db.prepareQuery(
+              "SELECT id, studentID, section, name, q1, q2, q3, q4, q5 FROM " +
+                  table + " ORDER BY name ASC LIMIT 50");
+
+    for (const [id, studentID, name, section, q1, q2, q3, q4, q5, q6]
+         of query.iter()) {
+        state.push({id, studentID, name, section, q1, q2, q3, q4, q5, q6});
+    }
+}
+
+
+Then to change the display you change:
+
+<body>
+    <h1>Submission just added</h1>
+    <p>Student ID: ${obj.studentID}</p>
+    <p>Name: ${obj.name}</p>
+    <p>Section: ${obj.section}</p>
+    <p>Q1: ${obj.q1}</p>
+    <p>Q2: ${obj.q2}</p>
+    <p>Q3: ${obj.q3}</p>
+    <p>Q4: ${obj.q4}</p>
+    <p>Q5: ${obj.q5}</p>
+    <form method="get" action="/">
+      <button type="submit">Home</button>
+    </form>
+  </body>
+</html>
+
+to...
+
+<body>
+    <h1>Submission just added</h1>
+    <p>Student ID: ${obj.studentID}</p>
+    <p>Name: ${obj.name}</p>
+    <p>Section: ${obj.section}</p>
+    <p>Q1: ${obj.q1}</p>
+    <p>Q2: ${obj.q2}</p>
+    <p>Q3: ${obj.q3}</p>
+    <p>Q4: ${obj.q4}</p>
+    <p>Q5: ${obj.q5}</p>
+    <p>Q5: ${obj.q6}</p>
+    <form method="get" action="/">
+      <button type="submit">Home</button>
+    </form>
+  </body>
+</html>
+
+4. You can use wget to upload data that is not properly validated if you use the command: 
+
+wget --header="Content-Type: application/json" --post-data='{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}' http://localhost:8000/uploadSubmission
+
+When I run deno run --allow-net --allow-read --allow-write submitdemo.js
+
+and then in another terminal use use the wget command we get:
+
+bradleynguyen@dhcp-61-73 submitdemo % curl -X POST http://localhost:8000/uploadSubmission -H "Content-Type: application/json" -d '{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}'
+Got the data% 
+
+Then when I go to list.html in localhost, I get:
+
+DB ID	Student ID	Name	Question 1	Question 2	Question 3	Question 4	Question 5
+
+7	123456	John Doe	Answer to Q1	Answer to Q2	null	null	null
+
+(Its lined up but I wanted to show how to looks like.)
+
+5. 
+In submitdemo.js first we'd need to encorporate a function that validates like in validator.js. Here, 
+we want to check for the expected questions, the required fields such as name, class, section, studentID, 
+title, and expected file name like on validator.js. Here we can make a function that is basically a 1-1 version of 
+whats in validator.js which would check the fields. Then in addSubmissions, I can call this function and based on 
+whether it returns a value or not, will return the status code 400 and the string "Bad Request".  
+
+6. To approach this problem, I thought of going through the database, especially studentIDs everytime we attempt to add. So in this case, first what we would do is make a fucntion to check if the studentID already exists within the databse in which can be done like this:
+
+function checkStudentIDExists(db, table, studentID) {
+    const query = db.query(`SELECT COUNT(*) FROM ${table} WHERE studentID = ?`, [studentID]);
+    const count = query.next().value[0];
+    return count > 0;
+}
+
+Then in addSubmission we can use the function 
+
+7.  
