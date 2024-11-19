@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>COMP 2406 Authorization Demo: Upload</title>
+    <link rel="stylesheet" href="/style.css">
+    <script type="text/javascript" src="/student/validator.js"></script>
+  </head>
+  <body onload="hideAnalysis()">
+    <h1>Upload Submission</h1>
+
+    <form>
+      <input type="file" id="assignmentFile"
+             onchange="loadAssignment(this, false)" />
+      <button type="button" onclick="uploadSubmission()">Upload</button>
+    </form>
+
+    <div id="analysis">
+      <p><b>Status:</b> <span id="status">UNKNOWN</span></p>
+      <p>Filename: <span id="filename"></span></p>
+      <p>Name: <span id="name"></span><br>
+        Student ID: <span id="studentID"></span> <i>(Please check that your ID number is correct!)</i></p>
+      <hr>
+      <div id="questions"><p><b>Questions:</b> <i>(Please check that your answers are numbered correctly!)</i></p></div>
+    </div>
+  </body>
+</html>

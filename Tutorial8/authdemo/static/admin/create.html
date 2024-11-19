@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>COMP 2406 Authorization Demo: Create an Account</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h1>Create an Account</h1>
+    <div>
+      <p>Fill out the info below on the account to be created:</p>
+      <form method="post" action="/admin/createAcct">
+        <div>
+          <input id="username" type="text" name="username">
+          <label>Username</label>
+        </div>
+        <div>
+          <input id="password" type="password" name="password">
+          <label>Password</label>
+        </div>
+        <div>
+          <input id="studentID" type="text" name="studentID">
+          <label>Student ID</label>
+        </div>
+	<div>
+          <input id="name" type="text" name="name">
+          <label>Name</label>
+        </div>
+        <div>
+          <label>Access: </label>
+          <select id="access" name="access">
+	    <option value="student">Student</option>
+	    <option value="admin">Admin</option>
+	  </select>
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </body>
+</html>

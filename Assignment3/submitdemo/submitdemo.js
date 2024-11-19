@@ -35,13 +35,6 @@ db.execute(`
   )
 `);
 
-db.execute(`
-    CREATE TABLE IF NOT EXISTS studentIDs (
-      studentID INTEGER PRIMARY KEY
-    )
-  `);
-
-
 function addSubmissionDB(db, table, r) {
     return db.query(`INSERT INTO ${table} ` +
                     "(studentID, name, q1, q2, q3, q4, q5) " +
@@ -68,15 +61,31 @@ function getAllSubmissionsDB(db, table) {
 }
 
 function analyzeSubmissionsDB(db, table) {
-    var analysis = {};
+    const analysis = { emptyAnswers: {} };
 
-    analysis.count = db.query("SELECT COUNT(*) FROM " + table);
-    analysis.studentIDList =
-        db.query("SELECT DISTINCT studentID FROM " + table);
-    
+    // Define questions to analyze
+    const questions = ["q1", "q2", "q3", "q4", "q5"];
+
+    // Initialize counters for empty answers
+    for (const question of questions) {
+        analysis.emptyAnswers[question] = 0;
+    }
+
+    // Query all submissions
+    const query = db.query(`SELECT ${questions.join(", ")} FROM ${table}`);
+
+    // Count empty answers
+    for (const row of query) {
+        for (let i = 0; i < questions.length; i++) {
+            const answer = row[i];
+            if (!answer || answer.trim() === "") {
+                analysis.emptyAnswers[questions[i]] += 1;
+            }
+        }
+    }
+
     return analysis;
 }
-
 
 function MIMEtype(filename) {
 
@@ -174,37 +183,34 @@ async function routeGet(req) {
 }
 
 async function showAnalysis() {
-    var analysis = analyzeSubmissionsDB(db, table);
-    var studentIDList =
-        '<li>' + analysis.studentIDList.join('</li> <li>') + '</li>';
-    
-    var analysisBody = `  <body>
-  <body>
-    <h1>Submissions analysis</h1>
-    <p># Records: ${analysis.count}</p>
-    <p>Student IDs:
-      <ol>
-       ${studentIDList}
-      </ol>
-    </p>
+    const analysis = analyzeSubmissionsDB(db, table);
 
+    let emptyAnswerReport = "";
+    for (const [question, count] of Object.entries(analysis.emptyAnswers)) {
+        emptyAnswerReport += `<li>${question}: ${count} empty answers</li>`;
+    }
+
+    const analysisBody = `
+  <body>
+    <h1>Submissions Analysis</h1>
+    <h2>Empty Answers per Question</h2>
+    <ul>
+      ${emptyAnswerReport}
+    </ul>
     <form method="get" action="/">
       <button type="submit">Home</button>
     </form>
   </body>
-</html>`
+</html>`;
 
-    var contents =
-        template_header("Submission analysis") + analysisBody;
+    const contents = template_header("Submission Analysis") + analysisBody;
 
-    var response = { contentType: "text/html",
-                     status: status_OK,
-                     contents: contents,
-                   };
-    
-    return response;
+    return {
+        contentType: "text/html",
+        status: status_OK,
+        contents: contents,
+    };
 }
-
 
 async function addSubmission(req) {
     const url = new URL(req.url);
@@ -286,7 +292,6 @@ async function route(req) {
     }
 }
 
-
 async function fileData(path) {
     var contents, status, contentType;
     
@@ -302,7 +307,6 @@ async function fileData(path) {
     
     return { contents, status, contentType };
 }
-
 
 async function handler(req) {
 
@@ -335,8 +339,6 @@ function checkStudentIDExists(db, studentID) {
 function addStudentID(db, studentID) {
     db.query("INSERT INTO studentIDs (studentID) VALUES (?)", [studentID]);
 }
-
-
 
 const ac = new AbortController();
 
