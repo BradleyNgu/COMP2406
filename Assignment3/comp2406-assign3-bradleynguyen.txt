@@ -52,7 +52,7 @@ function getAllSubmissionsDB(db, table) {
     var state = [];
     const query =
           db.prepareQuery(
-              "SELECT id, studentID, section, name, q1, q2, q3, q4, q5 FROM " +
+              "SELECT id, studentID, section, name, q1, q2, q3, q4, q5, q6 FROM " +
                   table + " ORDER BY name ASC LIMIT 50");
 
     for (const [id, studentID, name, section, q1, q2, q3, q4, q5, q6]
@@ -99,7 +99,7 @@ to...
   </body>
 </html>
 
-4. You can use wget to upload data that is not properly validated if you use the command: 
+4. You can use curl to upload data that is not properly validated if you use the command: 
 
 wget --header="Content-Type: application/json" --post-data='{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}' http://localhost:8000/uploadSubmission
 
@@ -116,16 +116,17 @@ DB ID	Student ID	Name	Question 1	Question 2	Question 3	Question 4	Question 5
 
 7	123456	John Doe	Answer to Q1	Answer to Q2	null	null	null
 
-(Its lined up but I wanted to show how to looks like.)
+(Its lined up but I wanted to show how it looks like.)
 
 5. 
 In submitdemo.js first we'd need to encorporate a function that validates like in validator.js. Here, 
 we want to check for the expected questions, the required fields such as name, class, section, studentID, 
-title, and expected file name like on validator.js. Here we can make a function that is basically a 1-1 version of 
+title, and expected file name like on validator.js. Here we can make a function that is basically a 1:1 version of 
 whats in validator.js which would check the fields. Then in addSubmissions, I can call this function and based on 
 whether it returns a value or not, will return the status code 400 and the string "Bad Request".  
 
-6. To approach this problem, I thought of going through the database, especially studentIDs everytime we attempt to add. So in this case, first what we would do is make a fucntion to check if the studentID already exists within the databse in which can be done like this:
+6. 
+To approach this problem, I thought of going through the database, especially studentIDs everytime we attempt to add. So in this case, first what we would do is make a function to check if the studentID already exists within the databse in which can be done like this:
 
 function checkStudentIDExists(db, table, studentID) {
     const query = db.query(`SELECT COUNT(*) FROM ${table} WHERE studentID = ?`, [studentID]);
@@ -133,7 +134,8 @@ function checkStudentIDExists(db, table, studentID) {
     return count > 0;
 }
 
-Then in addSubmission we can use the function 
+Then in addSubmission we can use the function to first check if all fields are valid then return a 409 conflict error if the studentID is already a duplicate (if checkStudentIDExists is true). Then Within the doUploadSubmission function in validator.js I would edit it so that when the 409 Error pops up, it would recieve it then update the tag to say, "ERROR Upload forbidden, student has already submitted."
+When I first started doing this, I thought I could add another list into the database to track the added studentIDs so I could parse through the list to see duplicates but then realized that is not only more work, but studentID is already tracked and in the database so I can already parse through that in order to get whether the studentID is a duplicate or not. 
 
 7. For this question, first I'm gonna edit analyzeSubmissionsDB. Here, I can count the amount of empty questions within each submission. Assuming there's 5 questions, I would write it like this:
 
