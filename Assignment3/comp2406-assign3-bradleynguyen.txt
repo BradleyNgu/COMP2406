@@ -101,10 +101,9 @@ to...
 
 4. You can use curl to upload data that is not properly validated if you use the command: 
 
-wget --header="Content-Type: application/json" --post-data='{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}' http://localhost:8000/uploadSubmission
+curl -X POST http://localhost:8000/uploadSubmission -H "Content-Type: application/json" -d '{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}'
 
 When I run deno run --allow-net --allow-read --allow-write submitdemo.js
-
 and then in another terminal use use the wget command we get:
 
 bradleynguyen@dhcp-61-73 submitdemo % curl -X POST http://localhost:8000/uploadSubmission -H "Content-Type: application/json" -d '{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}'
@@ -137,6 +136,7 @@ function checkStudentIDExists(db, table, studentID) {
 Then in addSubmission we can use the function to first check if all fields are valid then return a 409 conflict error if the studentID is already a duplicate (if checkStudentIDExists is true). Then Within the doUploadSubmission function in validator.js I would edit it so that when the 409 Error pops up, it would recieve it then update the tag to say, "ERROR Upload forbidden, student has already submitted."
 When I first started doing this, I thought I could add another list into the database to track the added studentIDs so I could parse through the list to see duplicates but then realized that is not only more work, but studentID is already tracked and in the database so I can already parse through that in order to get whether the studentID is a duplicate or not. 
 
+<<<<<<< Updated upstream
 7. For this question, first I'm gonna edit analyzeSubmissionsDB. Here, I can count the amount of empty questions within each submission. Assuming there's 5 questions, I would write it like this:
 
 function analyzeSubmissionsDB(db, table) {
@@ -204,3 +204,6 @@ async function showAnalysis() {
 Here, I mapped the questions and generates an HTML list to display the number of empty answers for each question.
 
 
+=======
+7.
+>>>>>>> Stashed changes
