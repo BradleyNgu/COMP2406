@@ -9,7 +9,7 @@ const filePrefix = "comp2406-tutorial7";
 Here instead of comp2406-tutorial7, we can name it comp2406-assign3-(this can be anything).txt
 
 2. Yes, even with more or less expected questions, it will still upload. The reason why this happens is because q is returned no matter what in checkSubmission. Since q is always return it will always upload. To fix this we can just make it so it returns nothing when: 
-if (questionString !== expectedQuestionList).
+questionString !== expectedQuestionList.
 
 3. To change the number of questions to 6 questions, I'll change this line of code:
 
