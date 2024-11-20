@@ -6,17 +6,10 @@ Student ID: 101270011
 
 const filePrefix = "comp2406-tutorial7";
 
-Here instead of comp2406-tutorial7, we can name it comp2406-assign3-(this can be anything).text
+Here instead of comp2406-tutorial7, we can name it comp2406-assign3-(this can be anything).txt
 
-2. No, it will not upload. For this, I added a 6th question in which I get this error:
-
-ERROR expected questions 1,2,3,4,5 but got questions 1,2,3,4,5,6
-
-When I press the upload button, I get the error:
-
-UPLOAD ERROR of comp2406-tutorial7-bradleynguyen.txt, failed with status 500
-
-The reason this happens is because validator.js first makes sure all fields are valid then the server will receive the upload request, and will appear in the database. If one condition isn't fulfilled, it will the server will not receive the upload request, and nothing will appear in the database.
+2. Yes, even with more or less expected questions, it will still upload. The reason why this happens is because q is returned no matter what in checkSubmission. Since q is always return it will always upload. To fix this we can just make it so it returns nothing when: 
+if (questionString !== expectedQuestionList).
 
 3. To change the number of questions to 6 questions, I'll change this line of code:
 
@@ -37,7 +30,7 @@ function addSubmissionDB(db, table, r) {
                     "(studentID, name, section, q1, q2, q3, q4, q5) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     [r.studentID, r.name,
-                     r["1"], r["2"], r["3"], r["4"], r["5"]]);
+                     r["1"], r["2"], r["3"], r["4"], r["5"], r["6"]]);
 }
 
 function getAllSubmissionsDB(db, table) {
@@ -142,4 +135,70 @@ function checkStudentIDExists(db, table, studentID) {
 
 Then in addSubmission we can use the function 
 
-7.  
+7. For this question, first I'm gonna edit analyzeSubmissionsDB. Here, I can count the amount of empty questions within each submission. Assuming there's 5 questions, I would write it like this:
+
+function analyzeSubmissionsDB(db, table) {
+    const questions = ["q1", "q2", "q3", "q4", "q5"];
+    const analysis = { totalSubmissions: 0, emptyAnswers: {} };
+
+    // Initialize empty answer counts for each question
+    for (const question of questions) {
+        analysis.emptyAnswers[question] = 0;
+    }
+
+    // Query all submissions
+    const rows = db.query(`SELECT ${questions.join(", ")} FROM ${table}`);
+    for (const row of rows) {
+        analysis.totalSubmissions++;
+
+        // Check each question for empty or whitespace-only answers
+        questions.forEach((question, index) => {
+            const answer = row[index];
+            if (!answer || answer.trim() === "") {
+                analysis.emptyAnswers[question]++;
+            }
+        });
+    }
+
+    return analysis;
+}
+
+This modification gives data for the 5 questions and checks if each line has a whitespace or not, then adds to the the list of emptyAnswers.
+
+After this, I will modify showAnalysis so that it includes the data from analyzeSubmissionsDB
+
+Here I would modify it like this:
+
+async function showAnalysis() {
+    const analysis = analyzeSubmissionsDB(db, table);
+
+    const emptyAnswersList = Object.entries(analysis.emptyAnswers)
+        .map(([question, count]) => `<li>${question.toUpperCase()}: ${count} empty answers</li>`)
+        .join("\n");
+
+    const analysisBody = `
+  <body>
+    <h1>Submissions Analysis</h1>
+    <p>Total Submissions: ${analysis.totalSubmissions}</p>
+    <p>Number of Empty Answers:</p>
+    <ul>
+      ${emptyAnswersList}
+    </ul>
+    <form method="get" action="/">
+      <button type="submit">Home</button>
+    </form>
+  </body>
+</html>`;
+
+    const contents = template_header("Submission Analysis") + analysisBody;
+
+    return {
+        contentType: "text/html",
+        status: status_OK,
+        contents: contents,
+    };
+}
+
+Here, I mapped the questions and generates an HTML list to display the number of empty answers for each question.
+
+

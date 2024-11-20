@@ -35,12 +35,6 @@ db.execute(`
   )
 `);
 
-db.execute(`
-    CREATE TABLE IF NOT EXISTS studentIDs (
-      studentID INTEGER PRIMARY KEY
-    )
-  `);
-
 
 function addSubmissionDB(db, table, r) {
     return db.query(`INSERT INTO ${table} ` +

@@ -138,6 +138,7 @@ function checkSubmission(fn, f) {
         updateTag("status", "ERROR expected questions " +
                   expectedQuestionList + " but got questions " +
                   questionString);
+        return;
     } else {
         updateTag("status", "PASSED " +
                   fn + ": " + q.name + " (" + q.studentID + ")");
