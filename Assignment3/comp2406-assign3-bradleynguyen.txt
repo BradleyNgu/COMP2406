@@ -107,8 +107,7 @@ to...
 
 To explain my process: Here, I just looked throught the code where it needs to validate/check for the certain fields like student number, section, file name, etc. 
 When doing this, I noticed that there's always the list of questions. So q1, q2, q3. q4. and q5. So it only makes sense that in order to actually 
-make it validate 6 questions, we'd have to add the 6th question as its hard coded in. Then I name to find the same fields that displays the records and 
-change it so that it displays a q6.
+make it validate 6 questions, we'd have to add the 6th question as its hard coded in. From here, I needed to change how it displays on the page, so I found where student number, section, file name, etc. were displayed and added a 6th question into it. All in all, wherever there were 5 elemtns, I added a 6th.
 
 4. You can use curl to upload data that is not properly validated if you use the command: 
 
