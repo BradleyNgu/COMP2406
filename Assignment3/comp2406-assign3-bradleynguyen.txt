@@ -6,12 +6,16 @@ Student ID: 101270011
 
 const filePrefix = "comp2406-tutorial7";
 
-Here instead of comp2406-tutorial7, we can name it comp2406-assign3-(this can be anything).txt
+Here instead of comp2406-tutorial7, we can name it comp2406-assign3
 
-2. Yes, even with more or less expected questions, it will still upload. The reason why this happens is because q is returned no matter what in checkSubmission. Since q is always return it will always upload. To fix this we can just make it so it returns nothing when: 
+This will make it so that the prefix is comp2406-assign3-(your name).txt
+
+2. Yes, even with more or less expected questions, it will still upload. The reason why this happens is because q is returned no matter what in 
+checkSubmission. Since q is always return it will always upload. To fix this we can just make it so it returns nothing when: 
 questionString !== expectedQuestionList.
 
-When doing this initially, I really did think that it would error, but taking a closer look at the code realized that q returns even if the questionString does equal expectedQuestionList.
+When doing this initially, I really did think that it would error, but taking a closer look at the code realized that q returns even if the 
+questionString does equal expectedQuestionList.
 
 3. To change the number of questions to 6 questions, I'll change this line of code:
 
@@ -101,13 +105,20 @@ to...
   </body>
 </html>
 
+To explain my process: Here, I just looked throught the code where it needs to validate/check for the certain fields like student number, section, file name, etc. 
+When doing this, I noticed that there's always the list of questions. So q1, q2, q3. q4. and q5. So it only makes sense that in order to actually 
+make it validate 6 questions, we'd have to add the 6th question as its hard coded in. Then I name to find the same fields that displays the records and 
+change it so that it displays a q6.
+
 4. You can use curl to upload data that is not properly validated if you use the command: 
 
 curl -X POST http://localhost:8000/uploadSubmission -H "Content-Type: application/json" -d '{"studentID":"123456","name":"John Doe","section":"A1","1":"Answer to Q1","2":"Answer to Q2"}'
 
 Here is what each thing does withing that comamnd to show my understanding:
 
--X POST specifies the request method, http://localhost:8000/uploadSubmission is the server URl and endpoint, -H "Content-Type: application/json" specifies the data format in the body as JSON, -d is a flag that provides the JSON data to send in the request body. After that we can specify each field we want to fill.
+-X POST specifies the request method, http://localhost:8000/uploadSubmission is the server URl and endpoint, 
+-H "Content-Type: application/json" specifies the data format in the body as JSON, 
+-d is a flag that provides the JSON data to send in the request body. After that we can specify each field we want to fill.
 
 When I run deno run --allow-net --allow-read --allow-write submitdemo.js
 and then in another terminal use use the wget command we get:
@@ -130,6 +141,11 @@ title, and expected file name like on validator.js. Here we can make a function 
 whats in validator.js which would check the fields. Then in addSubmissions, I can call this function and based on 
 whether it returns a value or not, will return the status code 400 and the string "Bad Request".  
 
+My process of thinking to arrive at the solutions stems from my understanding of client side and server side. Since validator.js is static it only works 
+client side and since we want it to validate server side we'd need to make the same checks as if it were client side in submitdemo.js. 
+Then after making sure everything is correct/incorrect, we can send the info to the addSubmission function to process and return a status 
+code and a string based on whether it passes everything or not.
+
 6. 
 To approach this problem, I thought of going through the database, especially studentIDs everytime we attempt to add. So in this case, first what we would do is make a function to check if the studentID already exists within the databse in which can be done like this:
 
@@ -151,5 +167,5 @@ When I was doing this, I had a lot of trouble coming up with an initial solution
 That was until I took a firther look into the code to see what's responsible for the anlysis page. 
 When I realized this, I realized I can probably just find a way to get the information 
 I wanted straight from the database and store it within an object like I did working on my 
-first hackathon project in which it was not only more efficient but also less of a headache to code.
+first hackathon project in which it was not only more efficient but also less of a headache to implement. 
 
