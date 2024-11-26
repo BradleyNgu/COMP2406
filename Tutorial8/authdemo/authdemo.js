@@ -63,9 +63,37 @@ async function routeGet(req) {
         return listSubmissions();
     } else if (path === "/admin/analyze") {
         return await showAnalysis();
-    }  else {
+    } else if (path === "/getCurrentStudentID") {
+        return await getCurrentStudentID(req); // Handle the request here
+    } else {
         return null;
     }
+}
+
+async function getCurrentStudentID(req) {
+    const authuser = requestAuthUser(req); // Extract the username from 'authuser' cookie
+    if (!authuser) {
+        return {
+            status: status_FORBIDDEN,
+            contentType: "application/json",
+            contents: JSON.stringify({ error: "User not authenticated" }),
+        };
+    }
+
+    const account = db.getAccount(authuser); // Retrieve account information from database
+    if (!account) {
+        return {
+            status: status_NOT_FOUND,
+            contentType: "application/json",
+            contents: JSON.stringify({ error: "User account not found" }),
+        };
+    }
+
+    return {
+        status: status_OK,
+        contentType: "application/json",
+        contents: JSON.stringify({ studentID: account.studentID }),
+    };
 }
 
 async function showAnalysis() {
