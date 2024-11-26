@@ -158,7 +158,7 @@ function redirect(url) {
         status: status_SEE_OTHER,
         contentType: "text/html",
         location: url,
-        content: "Redirect to " + url
+        contents: "Redirect to " + url
     }
 
     return response;
@@ -184,7 +184,7 @@ async function login(req) {
             response = {
                 status: status_INTERNAL_SERVER_ERROR,
                 contentType: "text/plain",
-                content: "Internal server error, unknown access.",
+                contents: "Internal server error, unknown access.",
             }
         }
     } else {
@@ -207,18 +207,37 @@ async function createAcct(req) {
     const result = db.addAccount(username, password, access, studentID, name);
     var response;
     
-    if (result) {
+    if (result) { //return an HTML response summarizing the account created
+        const summary = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Account Created</title>
+                <link rel="stylesheet" href="/style.css">
+            </head>
+            <body>
+                <h1>Account Successfully Created</h1>
+                <p><strong>Username:</strong> ${username}</p>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Student ID:</strong> ${studentID}</p>
+                <p><strong>Access Level:</strong> ${access}</p>
+                <form method="get" action="/">
+                    <button type="submit">Back to Login</button>
+                </form>
+            </body>
+            </html>
+        `;
         response = {
             status: status_OK,
-            contentType: "text/plain",
-            content: "Account created",
-        }
+            contentType: "text/html",
+            contents: summary,
+        };
     } else {
         response = {
             status: status_INTERNAL_SERVER_ERROR,
             contentType: "text/plain",
-            content: "Internal server error, could not create account.",
-        }
+            contents: "Internal server error, could not create account.",
+        };
     }
 
     return response;
