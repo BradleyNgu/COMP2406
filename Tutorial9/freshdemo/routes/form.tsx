@@ -1,30 +1,32 @@
-/** @jsx h */
-import { h } from "preact";
 import { Handlers, PageProps } from "$fresh/server.ts";
 
+const NAMES = ["Alice", "Bob", "Charlie", "Dave", "Eve", "Frank"];
+
 interface Data {
-  message?: string;
+  results: string[];
+  query: string;
 }
 
 export const handler: Handlers<Data> = {
-  async POST(req, ctx) {
-    const formData = await req.formData();
-    const name = formData.get("name")?.toString() || "Anonymous";
-    return ctx.render({ message: `Hello, ${name}! Your form was submitted.` });
+  GET(req, ctx) {
+    const url = new URL(req.url);
+    const query = url.searchParams.get("q") || "";
+    const results = NAMES.filter((name) => name.includes(query));
+    return ctx.render({ results, query });
   },
 };
 
-export default function FormPage({ data }: PageProps<Data>) {
+export default function Page({ data }: PageProps<Data>) {
+  const { results, query } = data;
   return (
     <div>
-      <h1>Form Submission</h1>
-      <form method="POST" action="/form">
-        <label>
-          Name: <input type="text" name="name" />
-        </label>
-        <button type="submit">Submit</button>
+      <form>
+        <input type="text" name="q" value={query} />
+        <button type="submit">Search</button>
       </form>
-      {data?.message && <p>{data.message}</p>}
+      <ul>
+        {results.map((name) => <li key={name}>{name}</li>)}
+      </ul>
     </div>
   );
 }
