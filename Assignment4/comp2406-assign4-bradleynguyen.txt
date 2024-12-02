@@ -1,3 +1,203 @@
 COMP 2406 2024F Assignment 4
 Name: Bradley Nguyen
 Student ID: 101270011
+
+1. 
+In Authdemo2 the number of submission questions is hardcoded as const expectedQuestionList = "1,2,3,4,5"; within validatorpcore.js.
+It differs from previous versions because it was often stored in the directory: /static/student/validator.js whereas in authdemo2, this portion of code is stored within /static/validator-core.js.
+
+2.
+The format of the submission data uploaded to the server is:
+{
+  "filename": "comp2406-assign4-username.txt",
+  "filecontents": "COMP 2406 2024F Assignment 4\nName: Student Name\nStudent ID: 101270011\n1. Answer 1\n2. Answer 2\n..."
+}
+
+I checked this by looking at doUploadSubmission in validator.js and addSubmission authdb.js
+Here in doUploadSubmission:
+
+function doUploadSubmission(filename, filecontents) {
+    if (filecontents) {
+        const request = new Request("/uploadSubmission", {
+            method: "POST",
+            body: JSON.stringify({filename, filecontents}),
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        fetch(request).then((response) => {
+            if (response.status === 200) {
+                updateTag("status", "UPLOAD COMPLETE of " + filename);
+            } else {
+                updateTag("status", "UPLOAD ERROR of " + filename);
+            }
+        });
+    }
+}
+In this code, it constructs the submission as a JSON object with filename and filecontents fields.
+In addSubmission:
+
+export function addSubmission(r) {
+    const qa = expectedQuestionList.split(",");
+    const answers = qa.map((q) => r[q]);
+
+    return db.query(`INSERT OR REPLACE INTO assign4 ` +
+                    "(studentID, " + queryQFields + ")" +
+                    "VALUES " + queryBlanks(numQuestions + 1), 
+                    [r.studentID].concat(answers));
+}
+
+it expects a JSON payload then processes the uploaded JSON to extract filecontents and parse the questions and answers.
+
+3. 
+When a user uplpaods multiple submissions, the server replaces the previous submission for the same student ID in the database. This is because of INSET OR REPLACE INTO SQL command in addSubmission.
+In previous versions, it has always been INSERT INTO ${submissionTable}
+
+4. Here, authdemo2 allows for uploading invalid submission although they are not stored in the database. Invalid submission are rejected and turned away by the CheckSubmission function in static/validator-core.js before reaching the database. In order to test this I made invalid files to confirm this in which it responds with a 400 Bad Request.
+
+5. To report the number of empty for each question in the analysis page, we first need to modify calcBlankQuestionStats in authdb.js to return the counts. This can be done like this:
+
+function calcBlankQuestionStats() {
+    function isBlank(str) {
+        return (!str || /^\s*$/.test(str));
+    }
+
+    const state = getAllSubmissions(); 
+    const counts = Array(numQuestions).fill(0); // Initialize counts for each question
+
+    for (let submission of state) {
+        for (let i = 0; i < counts.length; i++) {
+            let question = "q" + (i + 1); // like q1, q2, ...
+            if (isBlank(submission[question])) {
+                counts[i]++; // Increment if the answer is blank
+            }
+        }
+    }
+
+    return counts;
+}
+
+Now we need to modify showAnalysis in authdemo2.js:
+
+async function showAnalysis() {
+    var analysis = db.analyzeSubmissions(); // Retrieve analysis data
+    var studentIDList =
+        '<li>' + analysis.studentIDList.join('</li> <li>') + '</li>';
+    
+    var analysisBody = `  <body>
+  <body>
+    <h1>Submissions analysis</h1>
+    <p># Records: ${analysis.count}</p>
+    <p>Student IDs:
+      <ol>
+       ${studentIDList}
+      </ol>
+    </p>
+    <p>Empty answers per question: ${analysis.blankQuestions.join(", ")}</p>
+    <form method="get" action="/admin/index.html">
+      <button type="submit">Home</button>
+    </form>
+  </body>
+</html>`;
+
+    var contents =
+        template.header("Submission analysis") + analysisBody;
+
+    var response = { contentType: "text/html",
+                     status: status_OK,
+                     contents: contents,
+                   };
+    
+    return response;
+}
+all that is done here is that I added a single line to the HTML template in which the output would look like this:
+
+<p>Empty answers per question: 3, 0, 1, 2, 4</p>
+
+6.
+In authdemo2, the passwords are stored in the accounts table of the database. This is created and managed in the authdb.js file with the following schema:
+
+db.execute(`
+  CREATE TABLE IF NOT EXISTS accounts (
+    username TEXT PRIMARY KEY,
+    password TEXT,
+    access TEXT,
+    studentID TEXT,
+    name TEXT
+  )
+`);
+
+The password column holds the hashed version of the user's password, not the plaintext password.
+Passwords are hashed using Argon2 hashing algorithm as seen in the createAcct function in authdemo2.js:
+
+const pwhash = await hash(body.get("password"));
+const result = db.addAccount(username, pwhash, access, studentID, name);
+
+Here, Argon2 converts the password into a fixed-length string that is not reverable and each hash includes a random salt.
+
+Because the salts are unique, the hashes will differ, even if the passwords are the same. In conclusion, you cannot easily tell if two users chose the same passwords and Argon2 hasing and salting ensure that even identical passwords result in different hashes.
+
+7. In authdemo the username of the logged-in uder is storedin a cookie. Upon a successful login, the server stores the user's username in the Set-Cookie header while in authdemo2 the sessionID is stored in the cookie. This is better as the session ID is meaningless without the server's session database and even if the cookie is intercepted, the attacker has to compromise the database to use it. In authdemo2, storing a session ID is safer than storing a username because it doesn't reveal user information and it can be invalidated server-side. The session ID also ties the user to the server-sdie data which allows for more advanced session handling. The disadvantage of using authdemo2 is that it requires maintaining a sessions table in the database and the server must validate session IDs for every request which requires more computations.
+
+8. In authdemo2, the session duration is defined in miliseconds in authdb.js:
+
+const sessionLength = 3600 * 72 * 1000; // Sessions last 72 hours (3 days)
+
+The expiration time is calculated when a session is created:
+
+const expiration = Date.now() + sessionLength;
+
+To make the session last for 10 minutes, I'll update the sessionLength constant to:
+
+const sessionLength = 10 * 60 * 1000; 
+
+9. In authdemo2, it recieves the filename and filecontents as part of the submission payload via the addSubmission function within authdemo2.js:
+
+const submission = await req.json(); 
+const filename = submission.filename;
+const filecontents = submission.filecontents;
+
+Here, it validates the data using checkSubmission function from validator-core.js. The problem arises as the databased schema does not have field to sotre filename and filecontents.
+
+To add filename and filecontents to the database we'll modify the schema to add filename and filecontents columns to the assign4 table in authdb.js:
+
+db.execute(`
+  ALTER TABLE assign4 ADD COLUMN filename TEXT;
+`);
+
+db.execute(`
+  ALTER TABLE assign4 ADD COLUMN filecontents TEXT;
+`);
+
+Now we have to update addSubmissionto store the filename and filecontents in authdb.js
+export function addSubmission(r) {
+    const qa = expectedQuestionList.split(",");
+    const answers = qa.map((q) => r[q]);
+
+    return db.query(`INSERT OR REPLACE INTO ${submissionTable} ` +
+                    "(studentID, filename, filecontents, " + queryQFields + ")" +
+                    "VALUES " + queryBlanks(numQuestions + 3), 
+                    [r.studentID, r.filename, r.filecontents].concat(answers));
+}
+
+Now we need to modify addSubmission in authdemo2.js to include filename and filecontents.
+
+async function addSubmission(req) {
+    const session = getSession(req);
+    if (!session) {
+        return { status: status_UNAUTHORIZED, contentType: "text/plain", contents: "Unauthorized" };
+    }
+
+    const submission = await req.json();
+    const result = db.addSubmission({
+        studentID: session.username, // Use session's username
+        filename: submission.filename,
+        filecontents: submission.filecontents,
+        ...submission // Include question data
+    });
+
+    if (result) {
+        return { status: status_OK, contentType: "text/plain", contents: "Submission successful" };
+    } else {
+        return { status: status_INTERNAL_SERVER_ERROR, contentType: "text/plain", contents: "Submission failed" };
+    }
+}
