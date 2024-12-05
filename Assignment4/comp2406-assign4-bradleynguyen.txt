@@ -201,3 +201,4 @@ async function addSubmission(req) {
         return { status: status_INTERNAL_SERVER_ERROR, contentType: "text/plain", contents: "Submission failed" };
     }
 }
+When I was first doing this, i first thought I could pass filename and filecontents  to the existing addSubmission function. This resulted in an SQLITE error.
