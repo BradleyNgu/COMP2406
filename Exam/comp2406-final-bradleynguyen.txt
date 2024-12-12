@@ -1,0 +1,78 @@
+COMP 2406 2024F Final Exam
+Name: Bradley Nguyen
+Student ID: 101270011
+
+1a. dn represents the filename of the submission being validated and f represents the contents of the file as a string.
+
+1b. The loop iterates through the lines of the file f which parses and extrcat the answers for each question.
+
+1c. q is an object and q maps each question's number to a corresponding answer. In terms of the program's semantics, q maps to its corresponsing answer from the submission.
+
+2. Here we can create an object where each key is a route path (look-up table). From here, each key's value is ithe corresponding handler function for that route. Then we would use the extracted path from the request to fetch the corresponding handler from the lookup table. If no handler exists for the given path, it returns null/
+
+3. * as imports everything from the module as a single object. {} imports specific named exports
+We use {} when we only need a few specific exports from a module (not everything). We use * as when we need to access multiple exports and want to group them under a single namespace.
+
+It is similar to python imports for example:
+import random
+
+versus
+
+from random import randint as bruh
+
+4. Instead of awaiting req.json(), the function uses .then() to handle the resolved promise. From there each operation on the pasrsed data would be handled with thin .the() callback. Insider the block, I would validate and process the submission making sure that the response is returned at the end of the chain. The error handling would be dealt with using a .catch() block and the final .then() at the end of the chain would return the response.
+
+5a. We need --allow-read and --allow-write.
+
+5b. When you first run it, it will access the network to download the sqlite module
+
+5c. If the database doesn't already exist, it will be created
+
+5d. we can't be certain that the database is ready, If the database doesn't exist it will be created with no data tables. In this case, it is not ready queries.
+
+6. In dbdemo2.js, I would create a a function that generates the dynamic HTML document. From there, I would create a new route meaning I would need to modify routeGet. Next, we include the data from the data base.
+
+Mind you, this is how you would do it for SPECIFICALLY dbdemo2. I believe this wouldn't work for authdemo2.
+
+7. Student ID is extracted during submission validation in the checkSubmission function in validator-core.js. Here the Student ID is parsed from the second line of the uploaded file using regex. It is also extracted during addSubmission() in authdemo.js. There are 4 places where constraints are applied. In CheckSubmission() which ensures that the field is present in the submission file.
+It also check if the it follows a specifc format thus, /^Student ID:(.+)/m. In addSubission() Student ID is compared to the Student ID associated with the logged-in account in which returns a 403 Forbidden. Finally, In authdb.js the Student ID is treated as unique in the submissions table.
+
+8. Yes, the verification does exists in authdemo2. You can identify it by locating the comparison between the extracted studentID (q.studentID) and the logged-in user's studentID (account.studentID) in the addSubmission() function of authdemo2.js. This is made clear by this line:
+if (account.studentID !== q.studentID)
+
+in which it leads to a 403 forbidden response
+
+9a. The createQFields constant dynamically defines SQL fields for a table based on the expectedQuestionList.
+
+9b. the map method iterates over expectedQarray which modifies each question number amd turns it into a SQL column definition, which are then joined into a single string to define all columns dynamically.
+
+10. Users can modify or bypass client code that executed on the user's browsers. In authdemo2, the file must adhere to specific rules. If client-sides validation is performed, a user could bypass it by submitting an invalid file.
+
+11. 200 OK: Success in listSubmissions() which returns data for admins
+400 Bad Request: Invalid input in addSubmission() when missing fields
+401 Unauthorized: User not logged in in listSubmissions() with no session
+403 Forbidden: Access denied in listSubmissions() for non-admins
+
+12. if (!cookieStr) return null;
+This checks if the cookieStr is null, undefined, or an empty string in which will exit and return null. This prevents errors that could occur from trying to process an invalid or missing cookie string.
+const cookies = cookieStr.split(';');
+This splits the cookieStr into an array of individual cookies using the l definiton. This parses the cookie string into a list of key-value pair which can be processed further to get specific cookie values.
+
+13. First I would create a shared constant in a shared file like remplates.js. Here, I would replace every occurent of COMP 2406 Authorization Demo with this shared constant.
+
+14. The transmission is initiated in static/student/validator.js in the function doUploadSubmission() on lines 82-104
+The data is recieved in authdemo2.js in the function addSubmission(req) on lines 151-164
+
+15.If UNIQUE is removed from studentID, the database will allow multiple rows with the same studentID. This would lead to issues where duplicate submission are stored for the same student.
+
+16a. the export keyword allows the addAccount function to be imported and used in other files.
+
+16b. No, the INSERT query creates a new entry in the database and does not modify existing rows
+
+16c. Using ? ensures security by preventing SQL injection attacks
+
+17. The attacker would need to obtain or guess the hashed passwords in the table to log in, as the passwords are stored in hashed form.
+
+18. In aithdb.js, in function getSession() on line 189-192
+
+19. Overall, the course was very laid back and not that stressful. Even though most of it was hands off, I feel like I still benefitted from it. My only concern is that it might've been too hands off as sometimes I felt like I didn't get much assistance from lectures. Another thing that's concerning is the lack of feedback on marked assignments and the timing they're marked. Before the midterm and exam, assignments reflecting the content found in these assesments were usually not handed back in time and even if handed back, it was useless as we didn't know where we went wrong. Overall, the course is taught fine, and the hands off teaching is reflective of the real world, but feedback is key to learning and I felt that part of the course was greatly neglected.
