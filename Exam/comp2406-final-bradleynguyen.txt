@@ -2,9 +2,9 @@ COMP 2406 2024F Final Exam
 Name: Bradley Nguyen
 Student ID: 101270011
 
-1a. dn represents the filename of the submission being validated and f represents the contents of the file as a string.
+1a. fn represents the filename of the submission being validated and f represents the contents of the file as a string.
 
-1b. The loop iterates through the lines of the file f which parses and extrcat the answers for each question.
+1b. The loop iterates through the lines of the file f which parses and extracts the answers for each question.
 
 1c. q is an object and q maps each question's number to a corresponding answer. In terms of the program's semantics, q maps to its corresponsing answer from the submission.
 
@@ -73,6 +73,6 @@ The data is recieved in authdemo2.js in the function addSubmission(req) on lines
 
 17. The attacker would need to obtain or guess the hashed passwords in the table to log in, as the passwords are stored in hashed form.
 
-18. In aithdb.js, in function getSession() on line 189-192
+18. The time is defined on line 20, on line 162-172 it sets the expiration of the session, and in the function getSession() on line 189-192 it compares the dates to expiration in authdb.js
 
 19. Overall, the course was very laid back and not that stressful. Even though most of it was hands off, I feel like I still benefitted from it. My only concern is that it might've been too hands off as sometimes I felt like I didn't get much assistance from lectures. Another thing that's concerning is the lack of feedback on marked assignments and the timing they're marked. Before the midterm and exam, assignments reflecting the content found in these assesments were usually not handed back in time and even if handed back, it was useless as we didn't know where we went wrong. Overall, the course is taught fine, and the hands off teaching is reflective of the real world, but feedback is key to learning and I felt that part of the course was greatly neglected.
